@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef} from 'react'
 
 
 
@@ -7,6 +7,7 @@ function App() {
   const[numberAllowed, setnumberAllowed]=useState(false)
   const[password, setpassword]=useState("")
   const[charAllowed, setcharAllowed]=useState(false)
+  const passwordRef=useRef(null)
 
 
   const passwordgenerator=useCallback(()=>{
@@ -16,14 +17,24 @@ function App() {
 
     if(charAllowed) str+="~!@#$%^&*()_+/*"
 
-    for (let i = 0; i<= array.length; i++) {
+    for (let i = 0; i<=length; i++) {
       let char = Math.floor(Math.random()* str.length+1)
-      pass=str.charAt(char)
+      pass+=str.charAt(char)
       
     }
 
     setpassword(pass)
   },[length, numberAllowed, charAllowed, setpassword])
+
+  const copypasswordToClipboard=useCallback(()=>{
+    passwordRef.current?.select();
+    passwordRef.current?.setSelectioRange(0,5);
+    window.navigator.clipboard.writeText(password)
+  }, [password])
+
+  useEffect(()=>{
+    passwordgenerator()
+  }, [length, numberAllowed, charAllowed, passwordgenerator])
 
   return (
     <>
@@ -36,9 +47,12 @@ function App() {
       className='outline-none w-full py-1 px-3'
       placeholder='Password'
       readOnly
+      ref={passwordRef}
 
       />
-      <button className='outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0'>Copy</button>
+      <button onClick={copypasswordToClipboard}
+      className='outline-none bg-blue-700 text-white 
+      px-3 py-0.5 shrink-0'>Copy</button>
 
       </div>
 
@@ -64,16 +78,20 @@ function App() {
             setnumberAllowed((prev)=>!prev);
           }}
           />
+
           <label htmlFor='numberInput'>Numbers</label>
           <div className='flex items-center gap-x-1'>
           <input 
           type="checkbox"
-          defaultChecked={numberAllowed}
-          id="numberInput"
+          defaultChecked={charAllowed}
+          id="characterInput"
           onChange={()=>{
-            setnumberAllowed((prev)=>!prev);
+            setcharAllowed((prev)=>!prev);
           }}/>
+        
 
+          
+          <label htmlFor='characterInput'>Characters</label>
           </div>
         </div>
       </div>
